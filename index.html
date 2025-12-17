@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirm - A Moment of Calm</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e8edf2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            color: #4a5568;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 480px;
+            position: relative;
+        }
+
+        .screen {
+            background: white;
+            border-radius: 32px;
+            padding: 48px 32px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+            display: none;
+            text-align: center;
+            position: relative;
+            min-height: 500px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .screen.active {
+            display: flex;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .exit-button {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: none;
+            border: none;
+            color: #a0aec0;
+            font-size: 14px;
+            cursor: pointer;
+            padding: 8px 16px;
+            border-radius: 20px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .exit-button:hover {
+            background: #f7fafc;
+            color: #718096;
+        }
+
+        h1 {
+            font-size: 28px;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 16px;
+            line-height: 1.3;
+        }
+
+        .subtitle {
+            font-size: 16px;
+            color: #718096;
+            line-height: 1.6;
+            margin-bottom: 40px;
+        }
+
+        .button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 18px 36px;
+            border-radius: 28px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.25);
+            margin: 8px;
+        }
+
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 32px rgba(102, 126, 234, 0.35);
+        }
+
+        .button-secondary {
+            background: #f7fafc;
+            color: #718096;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .button-secondary:hover {
+            background: #edf2f7;
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+        }
+
+        .preview-box {
+            background: #f7fafc;
+            border-radius: 20px;
+            padding: 24px;
+            margin: 32px 0;
+            text-align: left;
+        }
+
+        .preview-item {
+            display: flex;
+            align-items: center;
+            margin: 16px 0;
+            color: #4a5568;
+            font-size: 15px;
+        }
+
+        .preview-icon {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 16px;
+            flex-shrink: 0;
+            color: white;
+            font-size: 16px;
+        }
+
+        .breathing-circle {
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 40px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 18px;
+            font-weight: 600;
+            transition: all 4s ease-in-out;
+            box-shadow: 0 20px 60px rgba(102, 126, 234, 0.3);
+        }
+
+        .breathing-circle.inhale {
+            transform: scale(1.4);
+        }
+
+        .breathing-circle.exhale {
+            transform: scale(1);
+        }
+
+        .breathing-text {
+            font-size: 20px;
+            color: #4a5568;
+            margin: 24px 0;
+            font-weight: 500;
+        }
+
+        .counter {
+            font-size: 14px;
+            color: #a0aec0;
+            margin-top: 16px;
+        }
+
+        .completion-icon {
+            width: 120px;
+            height: 120px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 32px;
+            color: white;
+            font-size: 48px;
+        }
+
+        .button-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 32px;
+        }
+
+        @keyframes gentlePulse {
+            0%, 100% { opacity: 0.8; }
+            50% { opacity: 1; }
+        }
+
+        .pulse-text {
+            animation: gentlePulse 2s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Screen 1: Welcome / Pause Screen -->
+        <div class="screen active" id="welcome-screen">
+            <button class="exit-button" onclick="handleExit()">Close</button>
+            <h1>You deserve a moment</h1>
+            <p class="subtitle">It's okay to pause. Take a breath and give yourself the space you need right now.</p>
+            <div class="button-group">
+                <button class="button" onclick="showScreen('preview-screen')">I need a moment</button>
+                <button class="button button-secondary" onclick="handleExit()">Maybe later</button>
+            </div>
+        </div>
+
+        <!-- Screen 2: Preview / Confirmation Screen -->
+        <div class="screen" id="preview-screen">
+            <button class="exit-button" onclick="handleExit()">Close</button>
+            <h1>Here's what will happen</h1>
+            <p class="subtitle">A gentle breathing exercise to help you reset. You're in control.</p>
+
+            <div class="preview-box">
+                <div class="preview-item">
+                    <div class="preview-icon">1</div>
+                    <div>We'll breathe together for a few cycles</div>
+                </div>
+                <div class="preview-item">
+                    <div class="preview-icon">2</div>
+                    <div>Follow the visual guide at your own pace</div>
+                </div>
+                <div class="preview-item">
+                    <div class="preview-icon">3</div>
+                    <div>You can stop or pause anytime</div>
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button class="button" onclick="startBreathing()">I'm ready to begin</button>
+                <button class="button button-secondary" onclick="showScreen('welcome-screen')">Go back</button>
+            </div>
+        </div>
+
+        <!-- Screen 3: Breathing Exercise Screen -->
+        <div class="screen" id="breathing-screen">
+            <button class="exit-button" onclick="handleStop()">Stop</button>
+            <h1>Breathe with me</h1>
+
+            <div class="breathing-circle" id="breathing-circle">
+                <span id="breathing-instruction" class="pulse-text">Breathe in</span>
+            </div>
+
+            <p class="breathing-text" id="breathing-guidance">Inhale slowly and gently</p>
+            <p class="counter" id="cycle-counter">Cycle 1 of 5</p>
+
+            <button class="button button-secondary" onclick="handleStop()" style="margin-top: 40px;">I'm done for now</button>
+        </div>
+
+        <!-- Screen 4: Completion Screen -->
+        <div class="screen" id="completion-screen">
+            <button class="exit-button" onclick="handleExit()">Close</button>
+
+            <div class="completion-icon">✓</div>
+
+            <h1>You took a moment</h1>
+            <p class="subtitle">That was a meaningful pause. You gave yourself what you needed, and that matters.</p>
+
+            <div class="button-group">
+                <button class="button" onclick="resetApp()">Take another moment</button>
+                <button class="button button-secondary" onclick="handleExit()">I'm ready to continue</button>
+            </div>
+        </div>
+
+        <!-- Screen 5: Early Exit Screen -->
+        <div class="screen" id="exit-screen">
+            <h1>That's okay</h1>
+            <p class="subtitle">You can come back whenever you need to. Take care of yourself.</p>
+
+            <div class="button-group">
+                <button class="button" onclick="resetApp()">Actually, I'll stay</button>
+                <button class="button button-secondary" onclick="window.close()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentCycle = 0;
+        const totalCycles = 5;
+        let breathingInterval;
+        let breathingCycleTimeout;
+
+        function showScreen(screenId) {
+            // Hide all screens
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+
+            // Show requested screen with delay for smooth transition
+            setTimeout(() => {
+                document.getElementById(screenId).classList.add('active');
+            }, 100);
+        }
+
+        function startBreathing() {
+            showScreen('breathing-screen');
+            currentCycle = 0;
+            runBreathingCycle();
+        }
+
+        function runBreathingCycle() {
+            if (currentCycle >= totalCycles) {
+                completeBreathing();
+                return;
+            }
+
+            currentCycle++;
+            updateCycleCounter();
+
+            const circle = document.getElementById('breathing-circle');
+            const instruction = document.getElementById('breathing-instruction');
+            const guidance = document.getElementById('breathing-guidance');
+
+            // Inhale phase (4 seconds)
+            circle.classList.remove('exhale');
+            circle.classList.add('inhale');
+            instruction.textContent = 'Breathe in';
+            guidance.textContent = 'Inhale slowly and gently';
+
+            // Hold phase (2 seconds)
+            setTimeout(() => {
+                instruction.textContent = 'Hold';
+                guidance.textContent = 'Hold for a moment';
+            }, 4000);
+
+            // Exhale phase (4 seconds)
+            setTimeout(() => {
+                circle.classList.remove('inhale');
+                circle.classList.add('exhale');
+                instruction.textContent = 'Breathe out';
+                guidance.textContent = 'Exhale and release';
+            }, 6000);
+
+            // Pause before next cycle (2 seconds)
+            setTimeout(() => {
+                instruction.textContent = 'Rest';
+                guidance.textContent = 'Notice how you feel';
+            }, 10000);
+
+            // Start next cycle (after 12 seconds total)
+            breathingCycleTimeout = setTimeout(() => {
+                runBreathingCycle();
+            }, 12000);
+        }
+
+        function updateCycleCounter() {
+            const counter = document.getElementById('cycle-counter');
+            counter.textContent = `Cycle ${currentCycle} of ${totalCycles}`;
+        }
+
+        function handleStop() {
+            clearTimeout(breathingCycleTimeout);
+            completeBreathing();
+        }
+
+        function completeBreathing() {
+            clearTimeout(breathingCycleTimeout);
+            showScreen('completion-screen');
+        }
+
+        function handleExit() {
+            clearTimeout(breathingCycleTimeout);
+            showScreen('exit-screen');
+        }
+
+        function resetApp() {
+            clearTimeout(breathingCycleTimeout);
+            currentCycle = 0;
+            const circle = document.getElementById('breathing-circle');
+            circle.classList.remove('inhale', 'exhale');
+            showScreen('welcome-screen');
+        }
+
+        // Clean up on page unload
+        window.addEventListener('beforeunload', () => {
+            clearTimeout(breathingCycleTimeout);
+        });
+    </script>
+</body>
+</html>
