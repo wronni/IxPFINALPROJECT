@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Confirm - A Moment of Calm</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Confirm</title>
     <style>
         * {
             margin: 0;
@@ -11,391 +11,623 @@
             box-sizing: border-box;
         }
 
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            position: fixed;
+        }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #f5f7fa 0%, #e8edf2 100%);
-            min-height: 100vh;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-image: url('gradientbackground.svg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            color: #ffffff;
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 20px;
-            color: #4a5568;
+        }
+
+        /* Fallback gradient if SVG not available */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg,
+                #667eea 0%,
+                #764ba2 25%,
+                #f093fb 50%,
+                #667eea 75%,
+                #764ba2 100%
+            );
+            background-size: 400% 400%;
+            animation: gradientShift 30s ease infinite;
+            z-index: -2;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Ambient overlay */
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 50% 50%,
+                rgba(255, 255, 255, 0.1) 0%,
+                rgba(0, 0, 0, 0.2) 100%
+            );
+            z-index: -1;
+            pointer-events: none;
         }
 
         .container {
-            width: 100%;
-            max-width: 480px;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
             position: relative;
         }
 
         .screen {
-            background: white;
-            border-radius: 32px;
-            padding: 48px 32px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
-            opacity: 0;
-            transform: translateY(20px);
-            transition: opacity 0.6s ease, transform 0.6s ease;
+            width: 100%;
+            height: 100%;
             display: none;
-            text-align: center;
-            position: relative;
-            min-height: 500px;
-            display: flex;
             flex-direction: column;
             justify-content: center;
+            align-items: center;
+            padding: 5vh 5vw;
+            opacity: 0;
+            transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            position: absolute;
+            top: 0;
+            left: 0;
         }
 
         .screen.active {
             display: flex;
             opacity: 1;
-            transform: translateY(0);
         }
 
-        .exit-button {
+        /* Minimal close button */
+        .close-btn {
+            position: fixed;
+            top: 4vh;
+            right: 4vw;
+            width: 44px;
+            height: 44px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 20px;
+            z-index: 1000;
+        }
+
+        .close-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.05);
+        }
+
+        /* Music control */
+        .music-control {
+            position: fixed;
+            bottom: 4vh;
+            right: 4vw;
+            width: 44px;
+            height: 44px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 16px;
+            z-index: 1000;
+        }
+
+        .music-control:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.05);
+        }
+
+        .music-control.playing::after {
+            content: '♪';
             position: absolute;
-            top: 20px;
-            right: 20px;
-            background: none;
-            border: none;
-            color: #a0aec0;
-            font-size: 14px;
-            cursor: pointer;
-            padding: 8px 16px;
-            border-radius: 20px;
-            transition: all 0.3s ease;
-            font-weight: 500;
+            animation: musicNote 2s ease-in-out infinite;
         }
 
-        .exit-button:hover {
-            background: #f7fafc;
-            color: #718096;
+        @keyframes musicNote {
+            0%, 100% { opacity: 0; transform: translateY(0); }
+            50% { opacity: 1; transform: translateY(-10px); }
         }
 
-        h1 {
-            font-size: 28px;
-            font-weight: 600;
-            color: #2d3748;
-            margin-bottom: 16px;
-            line-height: 1.3;
+        /* Typography */
+        .main-heading {
+            font-size: clamp(32px, 6vw, 72px);
+            font-weight: 300;
+            letter-spacing: -0.02em;
+            margin: 0 0 2vh 0;
+            text-align: center;
+            line-height: 1.1;
+            text-shadow: 0 2px 20px rgba(0, 0, 0, 0.2);
         }
 
-        .subtitle {
-            font-size: 16px;
-            color: #718096;
+        .subtitle-text {
+            font-size: clamp(16px, 2vw, 24px);
+            font-weight: 300;
+            letter-spacing: 0.01em;
+            opacity: 0.9;
+            margin: 0 0 6vh 0;
+            text-align: center;
+            max-width: 600px;
             line-height: 1.6;
-            margin-bottom: 40px;
         }
 
-        .button {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        /* Interactive elements */
+        .action-btn {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
             color: white;
-            border: none;
-            padding: 18px 36px;
-            border-radius: 28px;
-            font-size: 16px;
-            font-weight: 600;
+            padding: 18px 48px;
+            font-size: clamp(14px, 1.5vw, 18px);
+            font-weight: 400;
+            letter-spacing: 0.05em;
+            border-radius: 50px;
             cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.25);
-            margin: 8px;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            margin: 1vh 0;
+            min-width: 240px;
+            text-transform: lowercase;
         }
 
-        .button:hover {
+        .action-btn:hover {
+            background: rgba(255, 255, 255, 0.25);
+            border-color: rgba(255, 255, 255, 0.5);
             transform: translateY(-2px);
-            box-shadow: 0 12px 32px rgba(102, 126, 234, 0.35);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
         }
 
-        .button-secondary {
-            background: #f7fafc;
-            color: #718096;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        .action-btn.secondary {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.15);
         }
 
-        .button-secondary:hover {
-            background: #edf2f7;
-            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+        .action-btn.secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
         }
 
-        .preview-box {
-            background: #f7fafc;
-            border-radius: 20px;
-            padding: 24px;
-            margin: 32px 0;
-            text-align: left;
+        /* Preview items */
+        .preview-container {
+            display: flex;
+            flex-direction: column;
+            gap: 3vh;
+            margin: 4vh 0 6vh 0;
+            max-width: 500px;
         }
 
-        .preview-item {
+        .preview-step {
             display: flex;
             align-items: center;
-            margin: 16px 0;
-            color: #4a5568;
-            font-size: 15px;
+            gap: 20px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 16px;
+            transition: all 0.3s ease;
         }
 
-        .preview-icon {
-            width: 32px;
-            height: 32px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        .preview-step:hover {
+            background: rgba(255, 255, 255, 0.12);
+            transform: translateX(5px);
+        }
+
+        .step-number {
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-right: 16px;
-            flex-shrink: 0;
-            color: white;
-            font-size: 16px;
-        }
-
-        .breathing-circle {
-            width: 180px;
-            height: 180px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            margin: 40px auto;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
             font-size: 18px;
-            font-weight: 600;
-            transition: all 4s ease-in-out;
-            box-shadow: 0 20px 60px rgba(102, 126, 234, 0.3);
+            font-weight: 300;
+            flex-shrink: 0;
         }
 
-        .breathing-circle.inhale {
-            transform: scale(1.4);
+        .step-text {
+            font-size: clamp(14px, 1.5vw, 16px);
+            font-weight: 300;
+            opacity: 0.95;
+            line-height: 1.5;
         }
 
-        .breathing-circle.exhale {
+        /* Breathing visualization */
+        .breath-viz {
+            position: relative;
+            width: min(60vw, 60vh, 400px);
+            height: min(60vw, 60vh, 400px);
+            margin: 4vh 0;
+        }
+
+        .breath-circle {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: radial-gradient(circle,
+                rgba(255, 255, 255, 0.3) 0%,
+                rgba(255, 255, 255, 0.05) 100%
+            );
+            backdrop-filter: blur(20px);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow:
+                0 0 60px rgba(255, 255, 255, 0.2),
+                inset 0 0 60px rgba(255, 255, 255, 0.1);
+        }
+
+        .breath-circle.inhale {
+            transform: scale(1.3);
+            box-shadow:
+                0 0 100px rgba(255, 255, 255, 0.4),
+                inset 0 0 80px rgba(255, 255, 255, 0.2);
+        }
+
+        .breath-circle.exhale {
             transform: scale(1);
         }
 
-        .breathing-text {
-            font-size: 20px;
-            color: #4a5568;
-            margin: 24px 0;
-            font-weight: 500;
+        .breath-instruction {
+            font-size: clamp(24px, 4vw, 36px);
+            font-weight: 200;
+            letter-spacing: 0.1em;
+            text-transform: lowercase;
         }
 
-        .counter {
-            font-size: 14px;
-            color: #a0aec0;
-            margin-top: 16px;
+        .breath-guidance {
+            font-size: clamp(16px, 2vw, 20px);
+            font-weight: 300;
+            opacity: 0.8;
+            margin: 3vh 0 1vh 0;
+            letter-spacing: 0.05em;
         }
 
-        .completion-icon {
-            width: 120px;
-            height: 120px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        .cycle-info {
+            font-size: clamp(12px, 1.5vw, 14px);
+            opacity: 0.5;
+            font-weight: 300;
+            letter-spacing: 0.1em;
+        }
+
+        /* Completion icon */
+        .complete-icon {
+            width: min(30vw, 30vh, 180px);
+            height: min(30vw, 30vh, 180px);
             border-radius: 50%;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            border: 2px solid rgba(255, 255, 255, 0.3);
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 0 auto 32px;
-            color: white;
-            font-size: 48px;
+            font-size: clamp(48px, 8vw, 80px);
+            margin-bottom: 4vh;
+            box-shadow: 0 0 60px rgba(255, 255, 255, 0.3);
         }
 
-        .button-group {
+        /* Button groups */
+        .btn-group {
             display: flex;
             flex-direction: column;
-            gap: 12px;
-            margin-top: 32px;
+            gap: 2vh;
+            align-items: center;
         }
 
-        @keyframes gentlePulse {
-            0%, 100% { opacity: 0.8; }
-            50% { opacity: 1; }
+        /* Subtle animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
-        .pulse-text {
-            animation: gentlePulse 2s ease-in-out infinite;
+        .screen.active > * {
+            animation: fadeInUp 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+
+        .screen.active > *:nth-child(1) { animation-delay: 0.1s; }
+        .screen.active > *:nth-child(2) { animation-delay: 0.2s; }
+        .screen.active > *:nth-child(3) { animation-delay: 0.3s; }
+        .screen.active > *:nth-child(4) { animation-delay: 0.4s; }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .close-btn, .music-control {
+                width: 40px;
+                height: 40px;
+            }
+
+            .action-btn {
+                min-width: 200px;
+                padding: 16px 40px;
+            }
         }
     </style>
 </head>
 <body>
+    <!-- Background Audio -->
+    <audio id="bgMusic" loop>
+        <source src="backgroundmusic.MP3" type="audio/mpeg">
+    </audio>
+
+    <!-- Music Control -->
+    <button class="music-control" id="musicToggle" onclick="toggleMusic()" title="Toggle music">
+        ▶
+    </button>
+
     <div class="container">
-        <!-- Screen 1: Welcome / Pause Screen -->
-        <div class="screen active" id="welcome-screen">
-            <button class="exit-button" onclick="handleExit()">Close</button>
-            <h1>You deserve a moment</h1>
-            <p class="subtitle">It's okay to pause. Take a breath and give yourself the space you need right now.</p>
-            <div class="button-group">
-                <button class="button" onclick="showScreen('preview-screen')">I need a moment</button>
-                <button class="button button-secondary" onclick="handleExit()">Maybe later</button>
+        <!-- Welcome Screen -->
+        <div class="screen active" id="welcome">
+            <button class="close-btn" onclick="handleClose()">×</button>
+
+            <h1 class="main-heading">you deserve a moment</h1>
+            <p class="subtitle-text">it's okay to pause. take a breath and give yourself the space you need right now.</p>
+
+            <div class="btn-group">
+                <button class="action-btn" onclick="navigate('preview')">i need a moment</button>
+                <button class="action-btn secondary" onclick="handleClose()">maybe later</button>
             </div>
         </div>
 
-        <!-- Screen 2: Preview / Confirmation Screen -->
-        <div class="screen" id="preview-screen">
-            <button class="exit-button" onclick="handleExit()">Close</button>
-            <h1>Here's what will happen</h1>
-            <p class="subtitle">A gentle breathing exercise to help you reset. You're in control.</p>
+        <!-- Preview Screen -->
+        <div class="screen" id="preview">
+            <button class="close-btn" onclick="handleClose()">×</button>
 
-            <div class="preview-box">
-                <div class="preview-item">
-                    <div class="preview-icon">1</div>
-                    <div>We'll breathe together for a few cycles</div>
+            <h1 class="main-heading">here's what will happen</h1>
+            <p class="subtitle-text">a gentle breathing exercise to help you reset. you're in control.</p>
+
+            <div class="preview-container">
+                <div class="preview-step">
+                    <div class="step-number">1</div>
+                    <div class="step-text">we'll breathe together for a few cycles</div>
                 </div>
-                <div class="preview-item">
-                    <div class="preview-icon">2</div>
-                    <div>Follow the visual guide at your own pace</div>
+                <div class="preview-step">
+                    <div class="step-number">2</div>
+                    <div class="step-text">follow the visual guide at your own pace</div>
                 </div>
-                <div class="preview-item">
-                    <div class="preview-icon">3</div>
-                    <div>You can stop or pause anytime</div>
+                <div class="preview-step">
+                    <div class="step-number">3</div>
+                    <div class="step-text">you can stop or pause anytime</div>
                 </div>
             </div>
 
-            <div class="button-group">
-                <button class="button" onclick="startBreathing()">I'm ready to begin</button>
-                <button class="button button-secondary" onclick="showScreen('welcome-screen')">Go back</button>
+            <div class="btn-group">
+                <button class="action-btn" onclick="startBreathing()">i'm ready to begin</button>
+                <button class="action-btn secondary" onclick="navigate('welcome')">go back</button>
             </div>
         </div>
 
-        <!-- Screen 3: Breathing Exercise Screen -->
-        <div class="screen" id="breathing-screen">
-            <button class="exit-button" onclick="handleStop()">Stop</button>
-            <h1>Breathe with me</h1>
+        <!-- Breathing Screen -->
+        <div class="screen" id="breathing">
+            <button class="close-btn" onclick="handleStop()">×</button>
 
-            <div class="breathing-circle" id="breathing-circle">
-                <span id="breathing-instruction" class="pulse-text">Breathe in</span>
+            <h1 class="main-heading">breathe with me</h1>
+
+            <div class="breath-viz">
+                <div class="breath-circle" id="breathCircle">
+                    <span class="breath-instruction" id="breathInstruction">breathe in</span>
+                </div>
             </div>
 
-            <p class="breathing-text" id="breathing-guidance">Inhale slowly and gently</p>
-            <p class="counter" id="cycle-counter">Cycle 1 of 5</p>
+            <p class="breath-guidance" id="breathGuidance">inhale slowly and gently</p>
+            <p class="cycle-info" id="cycleInfo">cycle 1 of 5</p>
 
-            <button class="button button-secondary" onclick="handleStop()" style="margin-top: 40px;">I'm done for now</button>
-        </div>
-
-        <!-- Screen 4: Completion Screen -->
-        <div class="screen" id="completion-screen">
-            <button class="exit-button" onclick="handleExit()">Close</button>
-
-            <div class="completion-icon">✓</div>
-
-            <h1>You took a moment</h1>
-            <p class="subtitle">That was a meaningful pause. You gave yourself what you needed, and that matters.</p>
-
-            <div class="button-group">
-                <button class="button" onclick="resetApp()">Take another moment</button>
-                <button class="button button-secondary" onclick="handleExit()">I'm ready to continue</button>
+            <div class="btn-group" style="margin-top: 4vh;">
+                <button class="action-btn secondary" onclick="handleStop()">i'm done for now</button>
             </div>
         </div>
 
-        <!-- Screen 5: Early Exit Screen -->
-        <div class="screen" id="exit-screen">
-            <h1>That's okay</h1>
-            <p class="subtitle">You can come back whenever you need to. Take care of yourself.</p>
+        <!-- Completion Screen -->
+        <div class="screen" id="completion">
+            <button class="close-btn" onclick="handleClose()">×</button>
 
-            <div class="button-group">
-                <button class="button" onclick="resetApp()">Actually, I'll stay</button>
-                <button class="button button-secondary" onclick="window.close()">Close</button>
+            <div class="complete-icon">✓</div>
+
+            <h1 class="main-heading">you took a moment</h1>
+            <p class="subtitle-text">that was a meaningful pause. you gave yourself what you needed, and that matters.</p>
+
+            <div class="btn-group">
+                <button class="action-btn" onclick="reset()">take another moment</button>
+                <button class="action-btn secondary" onclick="handleClose()">i'm ready to continue</button>
+            </div>
+        </div>
+
+        <!-- Exit Screen -->
+        <div class="screen" id="exit">
+            <h1 class="main-heading">that's okay</h1>
+            <p class="subtitle-text">you can come back whenever you need to. take care of yourself.</p>
+
+            <div class="btn-group">
+                <button class="action-btn" onclick="reset()">actually, i'll stay</button>
+                <button class="action-btn secondary" onclick="finalClose()">close</button>
             </div>
         </div>
     </div>
 
     <script>
+        // State management
         let currentCycle = 0;
         const totalCycles = 5;
-        let breathingInterval;
-        let breathingCycleTimeout;
+        let breathingTimeout;
+        let musicPlaying = false;
 
-        function showScreen(screenId) {
-            // Hide all screens
-            document.querySelectorAll('.screen').forEach(screen => {
-                screen.classList.remove('active');
-            });
-
-            // Show requested screen with delay for smooth transition
+        // Navigation
+        function navigate(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             setTimeout(() => {
                 document.getElementById(screenId).classList.add('active');
             }, 100);
         }
 
-        function startBreathing() {
-            showScreen('breathing-screen');
-            currentCycle = 0;
-            runBreathingCycle();
+        // Music control
+        function toggleMusic() {
+            const audio = document.getElementById('bgMusic');
+            const btn = document.getElementById('musicToggle');
+
+            if (musicPlaying) {
+                audio.pause();
+                btn.textContent = '▶';
+                btn.classList.remove('playing');
+            } else {
+                audio.play().catch(e => console.log('Audio play prevented:', e));
+                btn.textContent = '❚❚';
+                btn.classList.add('playing');
+            }
+            musicPlaying = !musicPlaying;
         }
 
-        function runBreathingCycle() {
+        // Auto-start music on first interaction
+        let firstInteraction = true;
+        document.addEventListener('click', () => {
+            if (firstInteraction) {
+                const audio = document.getElementById('bgMusic');
+                audio.play().then(() => {
+                    musicPlaying = true;
+                    document.getElementById('musicToggle').textContent = '❚❚';
+                    document.getElementById('musicToggle').classList.add('playing');
+                }).catch(e => console.log('Autoplay prevented'));
+                firstInteraction = false;
+            }
+        }, { once: true });
+
+        // Breathing exercise
+        function startBreathing() {
+            navigate('breathing');
+            currentCycle = 0;
+            runBreathCycle();
+        }
+
+        function runBreathCycle() {
             if (currentCycle >= totalCycles) {
-                completeBreathing();
+                complete();
                 return;
             }
 
             currentCycle++;
-            updateCycleCounter();
+            updateCycleDisplay();
 
-            const circle = document.getElementById('breathing-circle');
-            const instruction = document.getElementById('breathing-instruction');
-            const guidance = document.getElementById('breathing-guidance');
+            const circle = document.getElementById('breathCircle');
+            const instruction = document.getElementById('breathInstruction');
+            const guidance = document.getElementById('breathGuidance');
 
-            // Inhale phase (4 seconds)
+            // Inhale (4s)
             circle.classList.remove('exhale');
             circle.classList.add('inhale');
-            instruction.textContent = 'Breathe in';
-            guidance.textContent = 'Inhale slowly and gently';
+            instruction.textContent = 'breathe in';
+            guidance.textContent = 'inhale slowly and gently';
 
-            // Hold phase (2 seconds)
-            setTimeout(() => {
-                instruction.textContent = 'Hold';
-                guidance.textContent = 'Hold for a moment';
+            // Hold (2s)
+            breathingTimeout = setTimeout(() => {
+                instruction.textContent = 'hold';
+                guidance.textContent = 'hold for a moment';
             }, 4000);
 
-            // Exhale phase (4 seconds)
-            setTimeout(() => {
+            // Exhale (4s)
+            breathingTimeout = setTimeout(() => {
                 circle.classList.remove('inhale');
                 circle.classList.add('exhale');
-                instruction.textContent = 'Breathe out';
-                guidance.textContent = 'Exhale and release';
+                instruction.textContent = 'breathe out';
+                guidance.textContent = 'exhale and release';
             }, 6000);
 
-            // Pause before next cycle (2 seconds)
-            setTimeout(() => {
-                instruction.textContent = 'Rest';
-                guidance.textContent = 'Notice how you feel';
+            // Rest (2s)
+            breathingTimeout = setTimeout(() => {
+                instruction.textContent = 'rest';
+                guidance.textContent = 'notice how you feel';
             }, 10000);
 
-            // Start next cycle (after 12 seconds total)
-            breathingCycleTimeout = setTimeout(() => {
-                runBreathingCycle();
+            // Next cycle
+            breathingTimeout = setTimeout(() => {
+                runBreathCycle();
             }, 12000);
         }
 
-        function updateCycleCounter() {
-            const counter = document.getElementById('cycle-counter');
-            counter.textContent = `Cycle ${currentCycle} of ${totalCycles}`;
+        function updateCycleDisplay() {
+            document.getElementById('cycleInfo').textContent =
+                `cycle ${currentCycle} of ${totalCycles}`;
         }
 
         function handleStop() {
-            clearTimeout(breathingCycleTimeout);
-            completeBreathing();
+            clearTimeout(breathingTimeout);
+            complete();
         }
 
-        function completeBreathing() {
-            clearTimeout(breathingCycleTimeout);
-            showScreen('completion-screen');
+        function complete() {
+            clearTimeout(breathingTimeout);
+            navigate('completion');
         }
 
-        function handleExit() {
-            clearTimeout(breathingCycleTimeout);
-            showScreen('exit-screen');
+        function handleClose() {
+            clearTimeout(breathingTimeout);
+            navigate('exit');
         }
 
-        function resetApp() {
-            clearTimeout(breathingCycleTimeout);
+        function finalClose() {
+            // Fade out and close
+            document.body.style.opacity = '0';
+            setTimeout(() => window.close(), 500);
+        }
+
+        function reset() {
+            clearTimeout(breathingTimeout);
             currentCycle = 0;
-            const circle = document.getElementById('breathing-circle');
+            const circle = document.getElementById('breathCircle');
             circle.classList.remove('inhale', 'exhale');
-            showScreen('welcome-screen');
+            navigate('welcome');
         }
 
-        // Clean up on page unload
+        // Cleanup
         window.addEventListener('beforeunload', () => {
-            clearTimeout(breathingCycleTimeout);
+            clearTimeout(breathingTimeout);
         });
+
+        // Prevent pull-to-refresh on mobile
+        document.body.addEventListener('touchmove', (e) => {
+            if (e.touches.length > 1) return;
+            e.preventDefault();
+        }, { passive: false });
     </script>
 </body>
 </html>
