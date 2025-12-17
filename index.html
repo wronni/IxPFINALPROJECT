@@ -129,41 +129,61 @@
             opacity: 1;
         }
 
-        /* Theme selector */
-        .theme-selector {
-            position: fixed;
-            top: max(env(safe-area-inset-top, 20px), 44px);
-            left: 5vw;
+        /* Theme selection cards */
+        .theme-cards {
             display: flex;
-            gap: 8px;
-            z-index: 100;
+            flex-direction: column;
+            gap: 20px;
+            width: 100%;
+            max-width: 90%;
         }
 
-        .theme-btn {
-            width: 44px;
-            height: 44px;
-            background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(20px);
-            border: 2px solid rgba(255, 255, 255, 0.25);
-            border-radius: 50%;
+        .theme-card {
+            padding: 32px 28px;
+            background: rgba(255, 255, 255, 0.18);
+            backdrop-filter: blur(30px);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 24px;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .theme-card:active {
+            transform: scale(0.98);
+            background: rgba(255, 255, 255, 0.25);
+        }
+
+        .theme-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.25);
             display: flex;
             align-items: center;
             justify-content: center;
-            color: rgba(255, 255, 255, 0.7);
-            font-size: 20px;
+            font-size: 32px;
+            flex-shrink: 0;
         }
 
-        .theme-btn.active {
-            background: rgba(255, 255, 255, 0.3);
-            border-color: rgba(255, 255, 255, 0.5);
-            color: rgba(255, 255, 255, 1);
-            box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+        .theme-info {
+            flex: 1;
         }
 
-        .theme-btn:active {
-            transform: scale(0.95);
+        .theme-name {
+            font-size: clamp(22px, 3vw, 28px);
+            font-weight: 300;
+            letter-spacing: 0.02em;
+            margin-bottom: 6px;
+        }
+
+        .theme-desc {
+            font-size: clamp(14px, 2vw, 17px);
+            font-weight: 300;
+            opacity: 0.85;
+            line-height: 1.4;
         }
 
         /* App-style close button */
@@ -429,15 +449,33 @@
     </style>
 </head>
 <body class="holistic-theme">
-    <!-- Theme Selector -->
-    <div class="theme-selector">
-        <button class="theme-btn active" id="holisticBtn" onclick="setTheme('holistic')" title="Holistic theme" aria-label="Holistic theme">🌸</button>
-        <button class="theme-btn" id="oceansideBtn" onclick="setTheme('oceanside')" title="Oceanside theme" aria-label="Oceanside theme">🌊</button>
-    </div>
-
     <div class="app-container">
+        <!-- Theme Selection Screen -->
+        <div class="screen active" id="themeSelection">
+            <h1 class="app-title">choose your<br>atmosphere</h1>
+            <p class="app-subtitle">select a visual theme to create your calming space</p>
+
+            <div class="theme-cards">
+                <div class="theme-card" onclick="selectThemeAndContinue('holistic')">
+                    <div class="theme-icon">🌸</div>
+                    <div class="theme-info">
+                        <div class="theme-name">holistic</div>
+                        <div class="theme-desc">purple and pink gradients for gentle warmth</div>
+                    </div>
+                </div>
+
+                <div class="theme-card" onclick="selectThemeAndContinue('oceanside')">
+                    <div class="theme-icon">🌊</div>
+                    <div class="theme-info">
+                        <div class="theme-name">oceanside</div>
+                        <div class="theme-desc">blue and green hues for peaceful calm</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Welcome Screen -->
-        <div class="screen active" id="welcome">
+        <div class="screen" id="welcome">
             <button class="close-btn" onclick="exitApp()" aria-label="Close">×</button>
 
             <h1 class="app-title">you deserve<br>a moment</h1>
@@ -535,30 +573,32 @@
         function setTheme(theme) {
             currentTheme = theme;
             const body = document.body;
-            const holisticBtn = document.getElementById('holisticBtn');
-            const oceansideBtn = document.getElementById('oceansideBtn');
 
             if (theme === 'holistic') {
                 body.classList.remove('oceanside-theme');
                 body.classList.add('holistic-theme');
-                holisticBtn.classList.add('active');
-                oceansideBtn.classList.remove('active');
             } else {
                 body.classList.remove('holistic-theme');
                 body.classList.add('oceanside-theme');
-                holisticBtn.classList.remove('active');
-                oceansideBtn.classList.add('active');
             }
 
             // Save preference
             localStorage.setItem('confirmTheme', theme);
         }
 
-        // Load saved theme on startup
+        // Theme selection and navigation
+        function selectThemeAndContinue(theme) {
+            setTheme(theme);
+            showScreen('welcome');
+        }
+
+        // Load saved theme on startup and skip to welcome if returning user
         window.addEventListener('DOMContentLoaded', () => {
             const savedTheme = localStorage.getItem('confirmTheme');
             if (savedTheme) {
                 setTheme(savedTheme);
+                // Skip theme selection for returning users
+                showScreen('welcome');
             }
         });
 
