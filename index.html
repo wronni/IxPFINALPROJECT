@@ -25,7 +25,6 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
-            background-image: url('gradientbackground.svg');
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
@@ -34,6 +33,16 @@
             display: flex;
             justify-content: center;
             align-items: center;
+            transition: background-image 0.8s ease;
+        }
+
+        /* Theme backgrounds */
+        body.holistic-theme {
+            background-image: url('gradientbackground.svg');
+        }
+
+        body.oceanside-theme {
+            background-image: url('gradientbackground1.svg');
         }
 
         /* Fallback gradient */
@@ -54,6 +63,16 @@
             background-size: 400% 400%;
             animation: gradientShift 30s ease infinite;
             z-index: -2;
+        }
+
+        body.oceanside-theme::before {
+            background: linear-gradient(135deg,
+                #2193b0 0%,
+                #6dd5ed 25%,
+                #00c9ff 50%,
+                #2193b0 75%,
+                #92fe9d 100%
+            );
         }
 
         @keyframes gradientShift {
@@ -82,7 +101,7 @@
         .app-container {
             width: 100vw;
             height: 100vh;
-            height: 100dvh; /* Dynamic viewport height for mobile */
+            height: 100dvh;
             display: flex;
             flex-direction: column;
             position: relative;
@@ -97,7 +116,7 @@
             justify-content: center;
             align-items: center;
             padding: 6vh 6vw;
-            padding-bottom: 12vh; /* Extra bottom padding for iPhone home indicator */
+            padding-bottom: 12vh;
             opacity: 0;
             transition: opacity 0.6s ease;
             position: relative;
@@ -110,7 +129,44 @@
             opacity: 1;
         }
 
-        /* App-style close button - iPhone optimized */
+        /* Theme selector */
+        .theme-selector {
+            position: fixed;
+            top: max(env(safe-area-inset-top, 20px), 44px);
+            left: 5vw;
+            display: flex;
+            gap: 8px;
+            z-index: 100;
+        }
+
+        .theme-btn {
+            width: 44px;
+            height: 44px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            border: 2px solid rgba(255, 255, 255, 0.25);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 20px;
+        }
+
+        .theme-btn.active {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.5);
+            color: rgba(255, 255, 255, 1);
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+        }
+
+        .theme-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* App-style close button */
         .close-btn {
             position: fixed;
             top: max(env(safe-area-inset-top, 20px), 44px);
@@ -137,41 +193,6 @@
             transform: scale(0.95);
         }
 
-        /* Music control - iPhone optimized */
-        .music-control {
-            position: fixed;
-            bottom: max(env(safe-area-inset-bottom, 20px), 32px);
-            right: 5vw;
-            width: 56px;
-            height: 56px;
-            background: rgba(255, 255, 255, 0.2);
-            backdrop-filter: blur(20px);
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
-            z-index: 100;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-        }
-
-        .music-control:active {
-            transform: scale(0.95);
-        }
-
-        .music-control.playing {
-            background: rgba(255, 255, 255, 0.3);
-            animation: pulse 2s ease-in-out infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { box-shadow: 0 8px 32px rgba(255, 255, 255, 0.2); }
-            50% { box-shadow: 0 8px 48px rgba(255, 255, 255, 0.4); }
-        }
-
         /* Typography - iPhone 16 optimized */
         .app-title {
             font-size: clamp(36px, 8vw, 64px);
@@ -194,7 +215,7 @@
             line-height: 1.5;
         }
 
-        /* APP Buttons - iPhone optimized */
+        /* APP Buttons */
         .app-btn {
             background: rgba(255, 255, 255, 0.2);
             backdrop-filter: blur(30px);
@@ -224,7 +245,7 @@
             border-color: rgba(255, 255, 255, 0.2);
         }
 
-        /* Preview cards - iPhone optimized */
+        /* Preview cards */
         .preview-stack {
             display: flex;
             flex-direction: column;
@@ -271,7 +292,7 @@
             line-height: 1.4;
         }
 
-        /* Breathing visualization - iPhone optimized */
+        /* Breathing visualization */
         .breath-container {
             position: relative;
             width: min(65vw, 65vh, 340px);
@@ -331,7 +352,7 @@
             letter-spacing: 0.08em;
         }
 
-        /* Completion icon - iPhone optimized */
+        /* Completion icon */
         .complete-badge {
             width: min(30vw, 30vh, 160px);
             height: min(30vw, 30vh, 160px);
@@ -407,16 +428,12 @@
         }
     </style>
 </head>
-<body>
-    <!-- Background Audio -->
-    <audio id="bgAudio" loop preload="auto">
-        <source src="backgroundmusic1.MP3" type="audio/mpeg">
-    </audio>
-
-    <!-- Music Control -->
-    <button class="music-control" id="musicBtn" onclick="toggleMusic()" aria-label="Toggle music">
-        <span id="musicIcon">▶</span>
-    </button>
+<body class="holistic-theme">
+    <!-- Theme Selector -->
+    <div class="theme-selector">
+        <button class="theme-btn active" id="holisticBtn" onclick="setTheme('holistic')" title="Holistic theme" aria-label="Holistic theme">🌸</button>
+        <button class="theme-btn" id="oceansideBtn" onclick="setTheme('oceanside')" title="Oceanside theme" aria-label="Oceanside theme">🌊</button>
+    </div>
 
     <div class="app-container">
         <!-- Welcome Screen -->
@@ -512,8 +529,38 @@
         let currentCycle = 0;
         const totalCycles = 5;
         let breathTimeout;
-        let musicPlaying = false;
-        let musicStarted = false;
+        let currentTheme = 'holistic';
+
+        // Theme management
+        function setTheme(theme) {
+            currentTheme = theme;
+            const body = document.body;
+            const holisticBtn = document.getElementById('holisticBtn');
+            const oceansideBtn = document.getElementById('oceansideBtn');
+
+            if (theme === 'holistic') {
+                body.classList.remove('oceanside-theme');
+                body.classList.add('holistic-theme');
+                holisticBtn.classList.add('active');
+                oceansideBtn.classList.remove('active');
+            } else {
+                body.classList.remove('holistic-theme');
+                body.classList.add('oceanside-theme');
+                holisticBtn.classList.remove('active');
+                oceansideBtn.classList.add('active');
+            }
+
+            // Save preference
+            localStorage.setItem('confirmTheme', theme);
+        }
+
+        // Load saved theme on startup
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem('confirmTheme');
+            if (savedTheme) {
+                setTheme(savedTheme);
+            }
+        });
 
         // Navigation
         function showScreen(screenId) {
@@ -522,53 +569,6 @@
                 document.getElementById(screenId).classList.add('active');
             }, 100);
         }
-
-        // Music control
-        function toggleMusic() {
-            const audio = document.getElementById('bgAudio');
-            const btn = document.getElementById('musicBtn');
-            const icon = document.getElementById('musicIcon');
-
-            if (musicPlaying) {
-                audio.pause();
-                icon.textContent = '▶';
-                btn.classList.remove('playing');
-                musicPlaying = false;
-            } else {
-                audio.play().then(() => {
-                    icon.textContent = '❚❚';
-                    btn.classList.add('playing');
-                    musicPlaying = true;
-                    musicStarted = true;
-                }).catch(e => {
-                    console.log('Audio playback prevented:', e);
-                    // Show visual feedback that music couldn't play
-                    icon.textContent = '🔇';
-                    setTimeout(() => icon.textContent = '▶', 2000);
-                });
-            }
-        }
-
-        // Auto-start music on first interaction
-        function attemptAutoplay() {
-            if (!musicStarted) {
-                const audio = document.getElementById('bgAudio');
-                audio.play().then(() => {
-                    const btn = document.getElementById('musicBtn');
-                    const icon = document.getElementById('musicIcon');
-                    icon.textContent = '❚❚';
-                    btn.classList.add('playing');
-                    musicPlaying = true;
-                    musicStarted = true;
-                }).catch(e => {
-                    console.log('Autoplay prevented - user can start music manually');
-                });
-            }
-        }
-
-        // Add click listener for autoplay
-        document.body.addEventListener('click', attemptAutoplay, { once: true });
-        document.body.addEventListener('touchstart', attemptAutoplay, { once: true });
 
         // Breathing exercise
         function startBreathing() {
